@@ -1,0 +1,2892 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>NICT Python Academy - Learn Python Programming</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/inter@5.0.8/index.min.css">
+    <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@fontsource/jetbrains-mono@5.0.8/index.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/alpinejs@3.13.3/dist/cdn.min.js" defer></script>
+    <style>
+        * { font-family: 'Inter', sans-serif; }
+        code, pre, .code-block { font-family: 'JetBrains Mono', monospace; }
+        
+        body {
+            background: linear-gradient(135deg, #0f172a 0%, #1e1b4b 50%, #0f172a 100%);
+            min-height: 100vh;
+        }
+
+        .glass {
+            background: rgba(255, 255, 255, 0.05);
+            backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+        }
+
+        .glass-strong {
+            background: rgba(255, 255, 255, 0.08);
+            backdrop-filter: blur(30px);
+            border: 1px solid rgba(255, 255, 255, 0.15);
+        }
+
+        .gradient-text {
+            background: linear-gradient(135deg, #6366f1, #8b5cf6, #06b6d4);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+        }
+
+        .code-block {
+            background: #1a1a2e;
+            border: 1px solid rgba(99, 102, 241, 0.3);
+            border-radius: 12px;
+            overflow: hidden;
+        }
+
+        .code-header {
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.2), rgba(139, 92, 246, 0.2));
+            padding: 8px 16px;
+            border-bottom: 1px solid rgba(99, 102, 241, 0.3);
+        }
+
+        /* Syntax highlighting colors */
+        .py-keyword { color: #c084fc; font-weight: 500; }
+        .py-string { color: #34d399; }
+        .py-comment { color: #6b7280; font-style: italic; }
+        .py-number { color: #fbbf24; }
+        .py-builtin { color: #f472b6; }
+        .py-decorator { color: #fb923c; }
+        .py-operator { color: #fb923c; }
+        .py-plain { color: #e5e7eb; }
+
+        .nav-item {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+
+        .nav-item:hover {
+            background: rgba(99, 102, 241, 0.2);
+            transform: translateX(4px);
+        }
+
+        .nav-item.active {
+            background: linear-gradient(90deg, rgba(99, 102, 241, 0.3), transparent);
+            border-left: 3px solid #6366f1;
+        }
+
+        .fade-in {
+            animation: fadeIn 0.5s ease forwards;
+        }
+
+        @keyframes fadeIn {
+            from { opacity: 0; transform: translateY(20px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+
+        .pulse-dot {
+            animation: pulse 2s infinite;
+        }
+
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.5; }
+        }
+
+        .scrollbar-thin::-webkit-scrollbar { width: 6px; }
+        .scrollbar-thin::-webkit-scrollbar-track { background: rgba(255, 255, 255, 0.05); }
+        .scrollbar-thin::-webkit-scrollbar-thumb { background: rgba(99, 102, 241, 0.5); border-radius: 3px; }
+
+        .quiz-option {
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+
+        .quiz-option:hover:not(.answered) {
+            background: rgba(99, 102, 241, 0.2);
+            border-color: #6366f1;
+        }
+
+        .quiz-option.correct {
+            background: rgba(34, 197, 94, 0.2);
+            border-color: #22c55e;
+        }
+
+        .quiz-option.wrong {
+            background: rgba(239, 68, 68, 0.2);
+            border-color: #ef4444;
+        }
+
+        .blob {
+            position: fixed;
+            border-radius: 50%;
+            filter: blur(80px);
+            opacity: 0.3;
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        @media (max-width: 768px) {
+            .sidebar {
+                position: fixed;
+                z-index: 50;
+                transform: translateX(-100%);
+                transition: transform 0.3s ease;
+            }
+            .sidebar.mobile-open {
+                transform: translateX(0);
+            }
+        }
+
+        .quiz-nav-dot {
+            transition: all 0.2s ease;
+        }
+        .quiz-nav-dot.active {
+            background: #6366f1;
+            transform: scale(1.3);
+        }
+    </style>
+</head>
+<body class="text-white overflow-x-hidden" x-data="app()" x-init="init()">
+    <div class="blob w-96 h-96 bg-indigo-600 top-0 left-0"></div>
+    <div class="blob w-96 h-96 bg-purple-600 bottom-0 right-0"></div>
+    <div class="blob w-64 h-64 bg-cyan-600 top-1/2 left-1/2"></div>
+
+    <button @click="mobileMenuOpen = !mobileMenuOpen" class="md:hidden fixed top-4 left-4 z-50 glass p-2 rounded-lg">
+        <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 6h16M4 12h16M4 18h16"/>
+        </svg>
+    </button>
+
+    <div class="flex min-h-screen relative z-10">
+        <aside :class="mobileMenuOpen ? 'mobile-open' : ''" class="sidebar fixed md:relative h-screen overflow-y-auto scrollbar-thin glass-strong w-[280px] flex-shrink-0">
+            <div class="p-6">
+                <div class="flex items-center gap-3 mb-8">
+                    <div class="w-10 h-10 rounded-xl bg-gradient-to-br from-indigo-500 to-purple-600 flex items-center justify-center">
+                        <span class="text-xl font-bold">🐍</span>
+                    </div>
+                    <div>
+                        <h1 class="font-bold text-lg gradient-text">NICT Python</h1>
+                        <p class="text-xs text-gray-400">Academy</p>
+                    </div>
+                </div>
+
+                <div class="glass rounded-xl p-4 mb-6">
+                    <div class="flex items-center justify-between mb-2">
+                        <span class="text-sm text-gray-300">Your Progress</span>
+                        <span class="text-sm font-bold text-indigo-400" x-text="progress + '%'"></span>
+                    </div>
+                    <div class="w-full bg-gray-700 rounded-full h-2">
+                        <div class="bg-gradient-to-r from-indigo-500 to-purple-500 h-2 rounded-full transition-all duration-500" :style="`width: ${progress}%`"></div>
+                    </div>
+                    <p class="text-xs text-gray-400 mt-2" x-text="completedTopics + '/' + totalTopics + ' topics completed'"></p>
+                </div>
+
+                <nav class="space-y-1">
+                    <template x-for="(topic, index) in topics" :key="index">
+                        <button @click="currentTopic = index; mobileMenuOpen = false; markVisited(index)"
+                                :class="currentTopic === index ? 'active' : ''"
+                                class="nav-item w-full text-left px-4 py-3 rounded-lg flex items-center gap-3 text-sm">
+                            <span class="text-lg" x-text="topic.icon"></span>
+                            <span class="flex-1 truncate" x-text="topic.title"></span>
+                            <span x-show="topic.visited" class="w-2 h-2 rounded-full bg-green-400 pulse-dot"></span>
+                        </button>
+                    </template>
+                </nav>
+            </div>
+        </aside>
+
+        <main class="flex-1 overflow-y-auto p-4 md:p-8">
+            <div class="max-w-5xl mx-auto">
+                <header class="mb-8 fade-in">
+                    <div class="flex items-center justify-between flex-wrap gap-4">
+                        <div>
+                            <h2 class="text-3xl md:text-4xl font-bold gradient-text mb-2" x-text="topics[currentTopic].title"></h2>
+                            <p class="text-gray-400" x-text="topics[currentTopic].subtitle"></p>
+                        </div>
+                        <div class="flex items-center gap-3">
+                            <button @click="toggleBookmark()" class="glass px-4 py-2 rounded-lg hover:bg-white/10 transition flex items-center gap-2">
+                                <span x-text="isBookmarked ? '⭐' : '☆'"></span>
+                                <span class="text-sm" x-text="isBookmarked ? 'Bookmarked' : 'Bookmark'"></span>
+                            </button>
+                            <button @click="completeTopic()" x-show="!topics[currentTopic].completed" class="bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 rounded-lg hover:opacity-90 transition text-sm font-medium">
+                                ✓ Mark Complete
+                            </button>
+                            <span x-show="topics[currentTopic].completed" class="bg-green-500/20 text-green-400 px-4 py-2 rounded-lg text-sm font-medium">
+                                ✓ Completed
+                            </span>
+                        </div>
+                    </div>
+                </header>
+
+                <div class="space-y-6 fade-in" :key="currentTopic">
+                    <template x-for="(section, sIndex) in topics[currentTopic].sections" :key="sIndex">
+                        <div class="glass rounded-2xl p-6 md:p-8">
+                            <h3 class="text-xl md:text-2xl font-bold mb-4 flex items-center gap-3">
+                                <span class="w-8 h-8 rounded-lg bg-gradient-to-br from-indigo-500/30 to-purple-500/30 flex items-center justify-center text-sm" x-text="sIndex + 1"></span>
+                                <span x-text="section.title"></span>
+                            </h3>
+
+                            <div class="text-gray-300 leading-relaxed space-y-4" x-html="section.content"></div>
+
+                            <template x-for="(code, cIndex) in (section.codes || [])" :key="'code-' + sIndex + '-' + cIndex">
+                                <div class="code-block mt-4">
+                                    <div class="code-header flex items-center justify-between">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-3 h-3 rounded-full bg-red-500"></div>
+                                            <div class="w-3 h-3 rounded-full bg-yellow-500"></div>
+                                            <div class="w-3 h-3 rounded-full bg-green-500"></div>
+                                            <span class="text-xs text-gray-400 ml-2" x-text="code.title || 'python'"></span>
+                                        </div>
+                                        <button @click="copyCode(code.code)" class="text-xs text-gray-400 hover:text-white transition px-2 py-1 rounded hover:bg-white/10">
+                                            📋 Copy
+                                        </button>
+                                    </div>
+                                    <pre class="p-4 overflow-x-auto text-sm leading-relaxed"><code x-html="highlightPython(code.code)"></code></pre>
+                                    <div x-show="code.output" class="border-t border-gray-700/50 p-4 bg-black/30">
+                                        <p class="text-xs text-gray-500 mb-1">▶ Output:</p>
+                                        <pre class="text-sm text-green-400 whitespace-pre-wrap" x-text="code.output"></pre>
+                                    </div>
+                                </div>
+                            </template>
+
+                            <div x-show="section.keyPoints" class="mt-6 glass rounded-xl p-5">
+                                <h4 class="font-bold text-indigo-400 mb-3 flex items-center gap-2">💡 Key Points</h4>
+                                <ul class="space-y-2">
+                                    <template x-for="(point, pIndex) in (section.keyPoints || [])" :key="pIndex">
+                                        <li class="flex items-start gap-2 text-sm text-gray-300">
+                                            <span class="text-indigo-400 mt-1">▸</span>
+                                            <span x-text="point"></span>
+                                        </li>
+                                    </template>
+                                </ul>
+                            </div>
+
+                            <div x-show="section.table" class="mt-6 overflow-x-auto">
+                                <table class="w-full text-sm">
+                                    <thead>
+                                        <tr class="border-b border-gray-700">
+                                            <template x-for="(header, hIndex) in (section.table?.headers || [])" :key="hIndex">
+                                                <th class="text-left py-3 px-4 text-indigo-400 font-semibold" x-text="header"></th>
+                                            </template>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <template x-for="(row, rIndex) in (section.table?.rows || [])" :key="rIndex">
+                                            <tr class="border-b border-gray-700/50 hover:bg-white/5 transition">
+                                                <template x-for="(cell, cIndex) in row" :key="cIndex">
+                                                    <td class="py-3 px-4 text-gray-300" x-text="cell"></td>
+                                                </template>
+                                            </tr>
+                                        </template>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+                    </template>
+
+                    <!-- Interactive Quiz Section with Multiple Questions -->
+                    <div x-show="topics[currentTopic].quizzes && topics[currentTopic].quizzes.length > 0" class="glass rounded-2xl p-6 md:p-8">
+                        <h3 class="text-xl font-bold mb-4 flex items-center gap-3">
+                            <span class="text-2xl">🧠</span>
+                            Practice Quiz
+                            <span class="text-sm font-normal text-gray-400" x-text="`(${currentQuizIndex + 1}/${topics[currentTopic].quizzes.length})`"></span>
+                        </h3>
+                        
+                        <template x-if="topics[currentTopic].quizzes && topics[currentTopic].quizzes.length > 0">
+                            <div>
+                                <!-- Quiz navigation dots -->
+                                <div class="flex gap-2 mb-5 flex-wrap">
+                                    <template x-for="(q, qIdx) in topics[currentTopic].quizzes" :key="qIdx">
+                                        <button @click="switchQuiz(qIdx)" 
+                                                :class="currentQuizIndex === qIdx ? 'active' : ''"
+                                                class="quiz-nav-dot w-8 h-8 rounded-full bg-gray-700 text-xs font-bold flex items-center justify-center hover:bg-indigo-500/50"
+                                                x-text="qIdx + 1"></button>
+                                    </template>
+                                </div>
+
+                                <p class="text-gray-300 mb-4 font-medium" x-text="topics[currentTopic].quizzes[currentQuizIndex].question"></p>
+                                <div class="space-y-3">
+                                    <template x-for="(option, oIndex) in topics[currentTopic].quizzes[currentQuizIndex].options" :key="oIndex">
+                                        <button @click="checkAnswer(oIndex)"
+                                                :class="getQuizClass(oIndex)"
+                                                class="quiz-option w-full text-left px-5 py-3 rounded-xl border border-gray-700 text-sm">
+                                            <span class="font-medium mr-2" x-text="String.fromCharCode(65 + oIndex) + '.'"></span>
+                                            <span x-text="option"></span>
+                                        </button>
+                                    </template>
+                                </div>
+                                <p x-show="quizAnswered" class="mt-4 text-sm p-3 rounded-lg" :class="quizCorrect ? 'text-green-400 bg-green-500/10' : 'text-red-400 bg-red-500/10'" x-text="quizCorrect ? '✅ Correct! Great job!' : '❌ Not quite. The correct answer is highlighted in green.'"></p>
+                                
+                                <div x-show="topics[currentTopic].quizzes[currentQuizIndex].explanation" class="mt-4 p-4 glass rounded-lg">
+                                    <p class="text-xs text-indigo-400 font-bold mb-1">💡 Explanation:</p>
+                                    <p class="text-sm text-gray-300" x-text="topics[currentTopic].quizzes[currentQuizIndex].explanation"></p>
+                                </div>
+
+                                <div class="flex justify-between mt-5">
+                                    <button @click="prevQuiz()" :disabled="currentQuizIndex === 0" class="glass px-4 py-2 rounded-lg text-sm hover:bg-white/10 transition disabled:opacity-30">← Previous</button>
+                                    <button @click="nextQuiz()" :disabled="currentQuizIndex === topics[currentTopic].quizzes.length - 1" class="bg-gradient-to-r from-indigo-500 to-purple-600 px-4 py-2 rounded-lg text-sm hover:opacity-90 transition disabled:opacity-30">Next →</button>
+                                </div>
+                            </div>
+                        </template>
+                    </div>
+
+                    <div class="flex justify-between items-center pt-4">
+                        <button @click="prevTopic()" :disabled="currentTopic === 0" class="glass px-5 py-3 rounded-xl hover:bg-white/10 transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2">
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"/></svg>
+                            Previous
+                        </button>
+                        <span class="text-sm text-gray-400" x-text="(currentTopic + 1) + ' / ' + totalTopics"></span>
+                        <button @click="nextTopic()" :disabled="currentTopic === totalTopics - 1" class="bg-gradient-to-r from-indigo-500 to-purple-600 px-5 py-3 rounded-xl hover:opacity-90 transition disabled:opacity-30 disabled:cursor-not-allowed flex items-center gap-2">
+                            Next
+                            <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24"><path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5l7 7-7 7"/></svg>
+                        </button>
+                    </div>
+                </div>
+
+                <footer class="mt-12 text-center text-gray-500 text-sm pb-8">
+                    <p>NICT Python Academy © 2026 | Prepared by Faculty</p>
+                    <p class="mt-1">Learn Python the Right Way 🐍</p>
+                </footer>
+            </div>
+        </main>
+    </div>
+
+    <div x-show="showToast" x-transition class="fixed bottom-6 right-6 glass-strong rounded-xl px-5 py-3 flex items-center gap-3 z-50">
+        <span x-text="toastIcon"></span>
+        <span class="text-sm" x-text="toastMessage"></span>
+    </div>
+
+    <script>
+        function app() {
+            return {
+                currentTopic: 0,
+                currentQuizIndex: 0,
+                mobileMenuOpen: false,
+                progress: 0,
+                completedTopics: 0,
+                totalTopics: 12,
+                isBookmarked: false,
+                quizAnswered: false,
+                quizCorrect: false,
+                selectedAnswer: -1,
+                showToast: false,
+                toastMessage: '',
+                toastIcon: '',
+
+                topics: [
+                    {
+                        title: "Introduction to Python",
+                        subtitle: "Get started with the world's most beginner-friendly programming language",
+                        icon: "🚀",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "What is Python?",
+                                content: `<p>Python is a <strong class="text-indigo-400">popular, interpreted, object-oriented, high-level programming language</strong> with dynamic semantics. It was created by <strong class="text-purple-400">Guido van Rossum</strong> and first released in <strong class="text-cyan-400">1991</strong>.</p>
+                                <p class="mt-3">The name "Python" is a nod to the British comedy group <em>Monty Python</em>. Python has a reputation as a beginner-friendly language because it handles much of the complexity for the user.</p>`,
+                                keyPoints: [
+                                    "Created by Guido van Rossum in 1991 at CWI, Netherlands",
+                                    "Interpreted language - code executes line by line",
+                                    "Dynamically typed - no need to declare variable types",
+                                    "Cross-platform - runs on Windows, Mac, Linux, Raspberry Pi",
+                                    "Simple syntax similar to English language"
+                                ]
+                            },
+                            {
+                                title: "Why Learn Python?",
+                                content: `<p>Python is used in many domains and is one of the most versatile programming languages available today:</p>`,
+                                keyPoints: [
+                                    "Web Development (server-side) - Django, Flask",
+                                    "Data Science & Machine Learning - NumPy, Pandas, TensorFlow",
+                                    "Software Development & System Scripting",
+                                    "Processing Big Data & Mathematical Computations",
+                                    "Fast Prototyping & Production-ready Software",
+                                    "Desktop GUI Applications - Tkinter, PyQt",
+                                    "Game Development, Automation, and much more!"
+                                ]
+                            },
+                            {
+                                title: "Python Features",
+                                content: `<p>Python comes packed with powerful features that make it stand out:</p>`,
+                                table: {
+                                    headers: ["Feature", "Description"],
+                                    rows: [
+                                        ["Easy to Learn", "Simple syntax, no semicolons or curly brackets needed"],
+                                        ["Expressive", "Complex tasks in fewer lines of code"],
+                                        ["Interpreted", "Executed line by line, easy debugging"],
+                                        ["Cross-platform", "Runs on Windows, Linux, Mac, etc."],
+                                        ["Open Source", "Free to use and contribute"],
+                                        ["Object-Oriented", "Supports classes, inheritance, polymorphism"],
+                                        ["Dynamic Typing", "No need to declare variable types"],
+                                        ["GUI Support", "Tkinter, PyQt, Kivy libraries"],
+                                        ["Integrated", "Works with C, C++, Java"]
+                                    ]
+                                }
+                            },
+                            {
+                                title: "Your First Python Program",
+                                content: `<p>Let's write the classic "Hello, World!" program - the first step in any programming journey!</p>`,
+                                codes: [
+                                    {
+                                        title: "hello.py",
+                                        code: `# My First Python Program
+print("Hello, World!")
+print("Welcome to NICT Python Academy!")
+
+# Python is case-sensitive
+Print("Hello")  # This will cause an error!`,
+                                        output: `Hello, World!
+Welcome to NICT Python Academy!`
+                                    },
+                                    {
+                                        title: "simple_calculator.py",
+                                        code: `# Simple arithmetic operations
+a = 15
+b = 4
+print("Addition:", a + b)
+print("Subtraction:", a - b)
+print("Multiplication:", a * b)
+print("Division:", a / b)
+print("Floor Division:", a // b)
+print("Modulus:", a % b)
+print("Power:", a ** b)`,
+                                        output: `Addition: 19
+Subtraction: 11
+Multiplication: 60
+Division: 3.75
+Floor Division: 3
+Modulus: 3
+Power: 50625`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Python files have .py extension",
+                                    "print() function displays output on screen",
+                                    "No semicolons needed at end of statements",
+                                    "Comments start with # symbol",
+                                    "Python is case-sensitive (Print ≠ print)"
+                                ]
+                            },
+                            {
+                                title: "Python Command Line & IDLE",
+                                content: `<p>Python can be run in two modes: <strong class="text-indigo-400">Interactive Mode</strong> (command line) and <strong class="text-purple-400">Script Mode</strong> (using .py files).</p>`,
+                                codes: [
+                                    {
+                                        title: "command_line.txt",
+                                        code: `# Check Python version
+C:\\Users\\YourName> python --version
+Python 3.11.4
+
+# Start Python interactive mode
+C:\\Users\\YourName> python
+>>> print("Hello, World!")
+Hello, World!
+>>> 5 + 3
+8
+>>> exit()`,
+                                        output: `Python 3.11.4
+Hello, World!
+8`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Use 'python --version' to check installation",
+                                    "Interactive mode (>>>) for quick testing",
+                                    "Script mode for writing full programs",
+                                    "Use exit() or Ctrl+D to quit interactive mode",
+                                    "IDLE is Python's built-in IDE"
+                                ]
+                            },
+                            {
+                                title: "Python History & Versions",
+                                content: `<p>Understanding Python's evolution helps appreciate its design:</p>`,
+                                table: {
+                                    headers: ["Year", "Version", "Key Changes"],
+                                    rows: [
+                                        ["1989", "Development Started", "Guido van Rossum at CWI, Netherlands"],
+                                        ["1991", "v0.9.0", "First public release"],
+                                        ["1994", "v1.0", "Added lambda, map, filter, reduce"],
+                                        ["2000", "v2.0", "List comprehensions, garbage collection"],
+                                        ["2008", "v3.0 (Py3K)", "Designed to fix fundamental flaws"],
+                                        ["2026", "v3.12+", "Current major version (what we use!)"]
+                                    ]
+                                }
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "Who created Python programming language?",
+                                options: ["James Gosling", "Guido van Rossum", "Dennis Ritchie", "Bjarne Stroustrup"],
+                                correct: 1,
+                                explanation: "Guido van Rossum created Python at CWI in Netherlands. He started development in December 1989 and released it in 1991."
+                            },
+                            {
+                                question: "In which year was Python first released?",
+                                options: ["1989", "1991", "1995", "2000"],
+                                correct: 1,
+                                explanation: "Python was first released in February 1991, labeled as version 0.9.0."
+                            },
+                            {
+                                question: "Which of the following is NOT a feature of Python?",
+                                options: ["Interpreted language", "Compiled language", "Object-oriented", "Dynamically typed"],
+                                correct: 1,
+                                explanation: "Python is an interpreted language, not compiled. Code is executed line by line by the Python interpreter."
+                            },
+                            {
+                                question: "The name 'Python' is derived from:",
+                                options: ["A snake species", "Monty Python comedy group", "A Greek philosopher", "A mathematical term"],
+                                correct: 1,
+                                explanation: "The name 'Python' is a nod to the British comedy group 'Monty Python's Flying Circus'."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Python Basics",
+                        subtitle: "Learn the fundamental building blocks of Python programming",
+                        icon: "📦",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Identifiers & Keywords",
+                                content: `<p><strong class="text-indigo-400">Identifiers</strong> are names given to variables, classes, methods, functions, etc. <strong class="text-purple-400">Keywords</strong> are reserved words that cannot be used as identifiers.</p>`,
+                                codes: [
+                                    {
+                                        title: "identifiers.py",
+                                        code: `# Valid Identifiers
+language = 'Python'
+_score = 100
+return_value = "success"
+name1 = "Student"
+MY_BOOK = "Python Guide"
+
+# Invalid Identifiers (will cause errors)
+# continue = 'Python'  # 'continue' is a keyword
+# @core = 10          # Special symbols not allowed
+# 1name = "test"      # Cannot start with digit
+# highest score = 90  # Spaces not allowed`,
+                                        output: ``
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Cannot be a Python keyword",
+                                    "Case-sensitive (Variable ≠ variable)",
+                                    "Must begin with a letter or underscore (_)",
+                                    "Can contain letters, digits, and underscores",
+                                    "No spaces or special characters allowed",
+                                    "Python has 35 keywords (False, True, class, def, if, else, for, while, etc.)"
+                                ],
+                                table: {
+                                    headers: ["Valid Identifiers", "Invalid Identifiers", "Reason"],
+                                    rows: [
+                                        ["_score", "@core", "Special symbols not allowed"],
+                                        ["return_value", "return", "'return' is a keyword"],
+                                        ["highest_score", "highest score", "Spaces not allowed"],
+                                        ["name1", "1name", "Cannot start with digit"],
+                                        ["MY_BOOK", "MY book", "Spaces not allowed"]
+                                    ]
+                                }
+                            },
+                            {
+                                title: "Variables & Data Types",
+                                content: `<p>Variables are containers for storing data values. Python is <strong class="text-indigo-400">dynamically typed</strong> - you don't need to declare the type!</p>`,
+                                codes: [
+                                    {
+                                        title: "variables.py",
+                                        code: `# Variable assignment - type is auto-detected
+name = "Packing box"    # String
+height = 10             # Integer
+width = 20.5            # Float
+is_valid = True         # Boolean
+
+print(name)
+print(height)
+print(width)
+
+# Check data type using type()
+print(type(name))
+print(type(height))
+print(type(width))
+
+# Multiple assignment
+x = y = z = 100
+print(x, y, z)
+
+# Multiple values to multiple variables
+a, b, c = 1, 2.5, "Hello"
+print(a, b, c)`,
+                                        output: `Packing box
+10
+20.5
+<class 'str'>
+<class 'int'>
+<class 'float'>
+100 100 100
+1 2.5 Hello`
+                                    },
+                                    {
+                                        title: "numbers_demo.py",
+                                        code: `# Three types of numbers in Python
+a = 5
+print("The type of a:", type(a))
+
+b = 40.5
+print("The type of b:", type(b))
+
+c = 1 + 3j
+print("The type of c:", type(c))
+print("Is c complex?", isinstance(c, complex))`,
+                                        output: `The type of a: <class 'int'>
+The type of b: <class 'float'>
+The type of c: <class 'complex'>
+Is c complex? True`
+                                    }
+                                ],
+                                table: {
+                                    headers: ["Data Type", "Example", "Description"],
+                                    rows: [
+                                        ["int", "x = 5", "Whole numbers (immutable)"],
+                                        ["float", "x = 3.14", "Decimal numbers (immutable)"],
+                                        ["complex", "x = 1+3j", "Complex numbers (immutable)"],
+                                        ["str", "x = 'hello'", "Text/characters (immutable)"],
+                                        ["list", "x = [1, 2, 3]", "Ordered, mutable collection"],
+                                        ["tuple", "x = (1, 2, 3)", "Ordered, immutable collection"],
+                                        ["dict", "x = {'a': 1}", "Key-value pairs (mutable)"],
+                                        ["set", "x = {1, 2, 3}", "Unique elements (mutable)"],
+                                        ["bool", "x = True", "True or False"]
+                                    ]
+                                }
+                            },
+                            {
+                                title: "Operators",
+                                content: `<p>Operators are symbols that perform operations on variables and values.</p>`,
+                                table: {
+                                    headers: ["Type", "Operators", "Example"],
+                                    rows: [
+                                        ["Arithmetic", "+ - * / % ** //", "10 + 5 = 15, 10 // 3 = 3"],
+                                        ["Comparison", "== != > < >= <=", "5 == 5 → True"],
+                                        ["Assignment", "= += -= *= /=", "x += 5 (same as x = x + 5)"],
+                                        ["Logical", "and or not", "True and False → False"],
+                                        ["Membership", "in not in", "3 in [1,2,3] → True"],
+                                        ["Identity", "is is not", "x is y → checks memory"],
+                                        ["Bitwise", "& | ^ ~ << >>", "60 & 13 = 12"]
+                                    ]
+                                },
+                                codes: [
+                                    {
+                                        title: "arithmetic_operators.py",
+                                        code: `# Arithmetic Operators
+a = 20
+b = 7
+print("Addition:", a + b)
+print("Subtraction:", a - b)
+print("Multiplication:", a * b)
+print("Division:", a / b)
+print("Modulus:", a % b)
+print("Exponent:", a ** b)
+print("Floor Division:", a // b)`,
+                                        output: `Addition: 27
+Subtraction: 13
+Multiplication: 140
+Division: 2.857142857142857
+Modulus: 6
+Exponent: 1280000000
+Floor Division: 2`
+                                    },
+                                    {
+                                        title: "comparison_logical.py",
+                                        code: `# Comparison Operators
+x = 10
+y = 5
+print("x == y:", x == y)
+print("x != y:", x != y)
+print("x > y:", x > y)
+print("x < y:", x < y)
+
+# Logical Operators
+a = True
+b = False
+print("a and b:", a and b)
+print("a or b:", a or b)
+print("not a:", not a)
+
+# Membership Operators
+fruits = ["apple", "banana", "cherry"]
+print("'banana' in fruits:", "banana" in fruits)
+print("'grape' not in fruits:", "grape" not in fruits)`,
+                                        output: `x == y: False
+x != y: True
+x > y: True
+x < y: False
+a and b: False
+a or b: True
+not a: False
+'banana' in fruits: True
+'grape' not in fruits: True`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "Console Input & Output",
+                                content: `<p>Python provides <code class="text-cyan-400">input()</code> for taking user input and <code class="text-cyan-400">print()</code> for displaying output.</p>`,
+                                codes: [
+                                    {
+                                        title: "io_example.py",
+                                        code: `# Console Output with end parameter
+print('Python is powerful')
+print('Good Morning!', end=' ')
+print('It is sunny today')
+
+# Using sep parameter
+print("NICT", "Python", "Academy", sep="-")
+print("2026", "09", "26", sep="/")
+
+# Console Input
+num = input('Enter a number: ')
+print('You Entered:', num)
+print('Data type:', type(num))  # Always string!
+
+# Type conversion for numeric input
+num = int(input('Enter a number: '))
+print('Square:', num ** 2)`,
+                                        output: `Python is powerful
+Good Morning! It is sunny today
+NICT-Python-Academy
+2026/09/26
+Enter a number: 34
+You Entered: 34
+Data type: <class 'str'>
+Enter a number: 5
+Square: 25`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "input() always returns a string",
+                                    "Use int(), float(), str() for type conversion",
+                                    "print() supports sep and end parameters",
+                                    "end='\\n' is default (new line after each print)",
+                                    "sep=',' separates multiple objects in print()"
+                                ]
+                            },
+                            {
+                                title: "Type Conversion",
+                                content: `<p>Converting one data type to another is called <strong class="text-indigo-400">type casting</strong>.</p>`,
+                                codes: [
+                                    {
+                                        title: "type_conversion.py",
+                                        code: `# Explicit Type Conversion (by programmer)
+num_string = '12'
+num_integer = 23
+print("Before:", type(num_string))
+
+num_string = int(num_string)
+print("After:", type(num_string))
+
+num_sum = num_integer + num_string
+print("Sum:", num_sum)
+
+# Implicit Type Conversion (automatic)
+integer_number = 123
+float_number = 1.23
+new_number = integer_number + float_number
+print("Value:", new_number)
+print("Type:", type(new_number))
+
+# More examples
+print(int(3.7))      # 3 (truncates)
+print(float(5))      # 5.0
+print(str(100))      # '100'
+print(bool(0))       # False
+print(bool(42))      # True`,
+                                        output: `Before: <class 'str'>
+After: <class 'int'>
+Sum: 35
+Value: 124.23
+Type: <class 'float'>
+3
+5.0
+100
+False
+True`
+                                    }
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "What is the output of: print(type(10))?",
+                                options: ["<class 'number'>", "<class 'int'>", "<class 'integer'>", "<class 'num'>"],
+                                correct: 1,
+                                explanation: "The type() function returns the class type of the argument. For whole numbers, it returns <class 'int'>."
+                            },
+                            {
+                                question: "Which of the following is a valid identifier?",
+                                options: ["1st_name", "_value", "my-var", "class"],
+                                correct: 1,
+                                explanation: "_value is valid because identifiers can start with underscore. Cannot start with digit, contain hyphens, or be a keyword."
+                            },
+                            {
+                                question: "What does input() return?",
+                                options: ["Integer", "Float", "String", "Depends on input"],
+                                correct: 2,
+                                explanation: "input() ALWAYS returns a string, regardless of what the user enters. Use int() or float() to convert."
+                            },
+                            {
+                                question: "What is the result of: 10 // 3?",
+                                options: ["3.33", "3", "4", "3.0"],
+                                correct: 1,
+                                explanation: "// is the floor division operator. It divides and returns the integer quotient (rounded down). 10 // 3 = 3."
+                            },
+                            {
+                                question: "Which operator is used for exponentiation?",
+                                options: ["^", "**", "//", "%"],
+                                correct: 1,
+                                explanation: "** is the exponentiation operator. Example: 2**3 = 8. Note: ^ is bitwise XOR in Python, not power."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Control Flow",
+                        subtitle: "Master decision-making and loops in Python",
+                        icon: "🔄",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "If-Else Statements",
+                                content: `<p>Conditional statements allow your program to make decisions based on conditions that evaluate to <code class="text-cyan-400">True</code> or <code class="text-cyan-400">False</code>.</p>`,
+                                codes: [
+                                    {
+                                        title: "if_else.py",
+                                        code: `# Simple if statement
+number = 6
+if number > 5:
+    print(number * number)
+
+# if-else statement
+password = input('Enter password: ')
+if password == "ncms":
+    print("Correct password")
+else:
+    print("Incorrect Password")
+
+# if-elif-else chain
+x = int(input("Enter a number (0-4): "))
+if x == 0:
+    print("You entered zero")
+elif x == 1:
+    print("You entered one")
+elif x == 2:
+    print("You entered two")
+else:
+    print("Beyond the range")
+
+# Nested if-else
+num1 = 15
+num2 = 20
+if num1 >= num2:
+    if num1 == num2:
+        print("Equal")
+    else:
+        print("num1 is greater")
+else:
+    print("num2 is greater")`,
+                                        output: `36
+Enter password: ncms
+Correct password
+Enter a number (0-4): 2
+You entered two
+num2 is greater`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Python uses indentation (4 spaces) to define code blocks",
+                                    "No curly braces {} needed",
+                                    "elif is Python's version of 'else if'",
+                                    "Conditions evaluate to True or False",
+                                    "Nested if-else for complex decisions"
+                                ]
+                            },
+                            {
+                                title: "While Loop",
+                                content: `<p>The <code class="text-cyan-400">while</code> loop repeats a block of code as long as the condition is True.</p>`,
+                                codes: [
+                                    {
+                                        title: "while_loop.py",
+                                        code: `# Basic while loop
+i = 1
+n = 5
+while i <= n:
+    print(i, end=' ')
+    i = i + 1
+print()  # new line
+
+# While with else
+count = 0
+while count < 3:
+    print("Inside loop")
+    count += 1
+else:
+    print("Inside else")
+
+# While with break
+i = 1
+while i <= 10:
+    print('6 *', i, '=', 6*i)
+    if i >= 5:
+        break
+    i = i + 1`,
+                                        output: `1 2 3 4 5
+Inside loop
+Inside loop
+Inside loop
+Inside else
+6 * 1 = 6
+6 * 2 = 12
+6 * 3 = 18
+6 * 4 = 24
+6 * 5 = 30`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "For Loop & Range",
+                                content: `<p>The <code class="text-cyan-400">for</code> loop iterates over sequences like lists, strings, and ranges.</p>`,
+                                codes: [
+                                    {
+                                        title: "for_loop.py",
+                                        code: `# For loop with list
+languages = ['Swift', 'Python', 'Go', 'JavaScript']
+for language in languages:
+    print(language)
+
+# For loop with string
+for x in 'Python':
+    print(x, end=' ')
+print()
+
+# Using range()
+print("range(5):", list(range(5)))
+print("range(2,8):", list(range(2, 8)))
+print("range(0,10,2):", list(range(0, 10, 2)))
+
+# Sum of numbers 1 to 10
+total = 0
+for i in range(1, 11):
+    total += i
+print("Sum 1-10:", total)`,
+                                        output: `Swift
+Python
+Go
+JavaScript
+P y t h o n
+range(5): [0, 1, 2, 3, 4]
+range(2,8): [2, 3, 4, 5, 6, 7]
+range(0,10,2): [0, 2, 4, 6, 8]
+Sum 1-10: 55`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "range(stop) - generates 0 to stop-1",
+                                    "range(start, stop) - generates start to stop-1",
+                                    "range(start, stop, step) - with custom step",
+                                    "for loop can iterate over any sequence",
+                                    "for loop can have optional else clause"
+                                ]
+                            },
+                            {
+                                title: "Break, Continue & Exit",
+                                content: `<p><code class="text-cyan-400">break</code> terminates the loop entirely. <code class="text-cyan-400">continue</code> skips the current iteration. <code class="text-cyan-400">exit()</code> terminates the program.</p>`,
+                                codes: [
+                                    {
+                                        title: "break_continue.py",
+                                        code: `# break - exits loop completely
+print("Using break:")
+for i in range(5):
+    if i == 3:
+        break
+    print(i, end=' ')
+print()
+
+# continue - skips current iteration
+print("Using continue:")
+for i in range(5):
+    if i == 3:
+        continue
+    print(i, end=' ')
+print()
+
+# Print odd numbers 1-10
+print("Odd numbers:")
+num = 0
+while num < 10:
+    num += 1
+    if num % 2 == 0:
+        continue
+    print(num, end=' ')
+print()
+
+# exit() example
+n = 7
+if n < 8:
+    print("Exiting program")
+    # exit()  # Uncomment to actually exit
+else:
+    print("Number is not less than 8")`,
+                                        output: `Using break:
+0 1 2
+Using continue:
+0 1 2 4
+Odd numbers:
+1 3 5 7 9
+Exiting program`
+                                    }
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "What does the 'break' statement do in a loop?",
+                                options: ["Skips the current iteration", "Exits the loop entirely", "Restarts the loop", "Pauses the loop"],
+                                correct: 1,
+                                explanation: "break terminates the loop completely and control moves to the statement after the loop."
+                            },
+                            {
+                                question: "What is the output of: for i in range(3): print(i)?",
+                                options: ["1 2 3", "0 1 2", "0 1 2 3", "1 2"],
+                                correct: 1,
+                                explanation: "range(3) generates numbers from 0 to 2 (stop is exclusive). So output is 0 1 2."
+                            },
+                            {
+                                question: "Which keyword is used for 'else if' in Python?",
+                                options: ["else if", "elseif", "elif", "elsif"],
+                                correct: 2,
+                                explanation: "Python uses 'elif' as the keyword for else-if conditions in conditional statements."
+                            },
+                            {
+                                question: "What will 'continue' do in a loop?",
+                                options: ["Exit the loop", "Skip to next iteration", "Restart the loop", "Pause execution"],
+                                correct: 1,
+                                explanation: "continue skips the rest of the current iteration and moves to the next iteration of the loop."
+                            },
+                            {
+                                question: "What is the output of: range(2, 10, 3)?",
+                                options: ["[2, 5, 8]", "[2, 5, 8, 11]", "[3, 6, 9]", "[2, 3, 4, 5, 6, 7, 8, 9]"],
+                                correct: 0,
+                                explanation: "range(2, 10, 3) starts at 2, stops before 10, with step 3. So: 2, 5, 8."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Strings",
+                        subtitle: "Master text manipulation in Python",
+                        icon: "📝",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Creating & Accessing Strings",
+                                content: `<p>Strings are sequences of characters enclosed in quotes. They are <strong class="text-indigo-400">immutable</strong> (cannot be changed after creation).</p>`,
+                                codes: [
+                                    {
+                                        title: "strings.py",
+                                        code: `# Creating strings
+single_str = 'Hello'
+double_str = "Hello World"
+triple_str = """Welcome to
+NICT Python Academy"""
+
+print(single_str)
+print(double_str)
+print(triple_str)
+
+# Accessing characters
+name = "Python"
+print("First:", name[0])
+print("Last:", name[-1])
+print("Slice [2:5]:", name[2:5])
+print("Reverse:", name[::-1])
+
+# String operations
+greet = "Hello"
+print("Concat:", greet + " World")
+print("Repeat:", greet * 3)
+print("Length:", len(greet))
+print("Membership:", "ll" in greet)`,
+                                        output: `Hello
+Hello World
+Welcome to
+NICT Python Academy
+First: P
+Last: n
+Slice [2:5]: tho
+Reverse: nohtyP
+Concat: Hello World
+Repeat: HelloHelloHello
+Length: 5
+Membership: True`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "String Methods",
+                                content: `<p>Python provides many built-in methods for string manipulation:</p>`,
+                                table: {
+                                    headers: ["Method", "Description", "Example"],
+                                    rows: [
+                                        ["upper()", "Converts to uppercase", "'hello'.upper() → 'HELLO'"],
+                                        ["lower()", "Converts to lowercase", "'HELLO'.lower() → 'hello'"],
+                                        ["strip()", "Removes whitespace", "' hi '.strip() → 'hi'"],
+                                        ["replace()", "Replaces substring", "'hi'.replace('h','j') → 'ji'"],
+                                        ["split()", "Splits into list", "'a,b,c'.split(',') → ['a','b','c']"],
+                                        ["join()", "Joins list to string", "','.join(['a','b']) → 'a,b'"],
+                                        ["find()", "Finds substring index", "'hello'.find('ll') → 2"],
+                                        ["count()", "Counts occurrences", "'hello'.count('l') → 2"],
+                                        ["startswith()", "Checks prefix", "'hello'.startswith('he') → True"],
+                                        ["endswith()", "Checks suffix", "'hello'.endswith('lo') → True"]
+                                    ]
+                                },
+                                codes: [
+                                    {
+                                        title: "string_methods.py",
+                                        code: `text = "  Hello, Python World!  "
+
+print("Strip:", text.strip())
+print("Upper:", text.upper())
+print("Lower:", text.lower())
+print("Replace:", text.replace("Python", "NICT"))
+print("Split:", text.split(","))
+
+# f-Strings (formatted strings)
+name = 'Jack'
+country = 'UK'
+print(f'{name} is from {country}')
+
+# Raw strings (ignore backslashes)
+path = r"C:\\Users\\new_folder"
+print(path)
+
+# String comparison
+str1 = "Hello"
+str2 = "hello"
+print("Equal:", str1 == str2)
+print("Case equal:", str1.lower() == str2.lower())`,
+                                        output: `Strip: Hello, Python World!
+Upper:   HELLO, PYTHON WORLD!  
+Lower:   hello, python world!  
+Replace:   Hello, NICT World!  
+Split: ['  Hello', ' Python World!  ']
+Jack is from UK
+C:\\Users\\new_folder
+Equal: False
+Case equal: True`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "String Slicing",
+                                content: `<p>Slicing extracts a portion of a string using the <code class="text-cyan-400">[start:stop:step]</code> syntax.</p>`,
+                                codes: [
+                                    {
+                                        title: "slicing.py",
+                                        code: `S = 'ABCDEFGHI'
+
+print("S[2:7]:", S[2:7])
+print("S[:3]:", S[:3])
+print("S[6:]:", S[6:])
+print("S[-7:-2]:", S[-7:-2])
+print("S[2:7:2]:", S[2:7:2])
+print("S[::-1]:", S[::-1])
+print("S[6:1:-2]:", S[6:1:-2])
+
+# Using slice() method
+String = 'ASTRING'
+s1 = slice(3)
+s2 = slice(1, 5, 2)
+print("slice(3):", String[s1])
+print("slice(1,5,2):", String[s2])`,
+                                        output: `S[2:7]: CDEFG
+S[:3]: ABC
+S[6:]: GHI
+S[-7:-2]: CDEFG
+S[2:7:2]: CEG
+S[::-1]: IHGFEDCBA
+S[6:1:-2]: GEC
+slice(3): AST
+slice(1,5,2): SR`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Start index is INCLUDED, stop index is EXCLUDED",
+                                    "Negative indices count from the end (-1 = last)",
+                                    "Omitting start means from beginning",
+                                    "Omitting stop means to the end",
+                                    "Step of -1 reverses the string",
+                                    "slice() method is alternative to [::] syntax"
+                                ]
+                            },
+                            {
+                                title: "Format Specifiers & f-Strings",
+                                content: `<p>String formatting allows inserting variables into strings:</p>`,
+                                codes: [
+                                    {
+                                        title: "formatting.py",
+                                        code: `# Old style (% operator)
+name = "Alice"
+age = 25
+print("Name: %s, Age: %d" % (name, age))
+print("Pi: %.2f" % 3.14159)
+
+# str.format() method
+print("Name: {}, Age: {}".format(name, age))
+print("Name: {0}, Age: {1}".format(name, age))
+
+# f-Strings (Python 3.6+) - RECOMMENDED
+print(f"Name: {name}, Age: {age}")
+print(f"Next year: {age + 1}")
+print(f"Pi: {3.14159:.2f}")
+
+# Escape sequences
+print("Line1\\nLine2")
+print("Tab\\there")
+print("Quote: \\"Hello\\"")`,
+                                        output: `Name: Alice, Age: 25
+Pi: 3.14
+Name: Alice, Age: 25
+Name: Alice, Age: 25
+Name: Alice, Age: 25
+Next year: 26
+Pi: 3.14
+Line1
+Line2
+Tab	here
+Quote: "Hello"`
+                                    }
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "What is the output of: print('Python'[1:4])?",
+                                options: ["Pyt", "yth", "ytho", "Pyth"],
+                                correct: 1,
+                                explanation: "Slicing [1:4] includes indices 1, 2, 3 (stop is exclusive). 'Python'[1]='y', [2]='t', [3]='h' → 'yth'."
+                            },
+                            {
+                                question: "Which method converts a string to uppercase?",
+                                options: ["toUpperCase()", "upper()", "uppercase()", "toUpper()"],
+                                correct: 1,
+                                explanation: "upper() is the Python string method that returns a copy of the string with all characters converted to uppercase."
+                            },
+                            {
+                                question: "What does 'Hello'[::-1] return?",
+                                options: ["Hello", "olleH", "Error", "elloH"],
+                                correct: 1,
+                                explanation: "[::-1] reverses the string. Start and stop are omitted (full string), step is -1 (reverse direction)."
+                            },
+                            {
+                                question: "Which is the correct way to create an f-string?",
+                                options: ["f'Hello {name}'", "format('Hello {name}')", "'Hello' + name", "string.f('Hello {name}')"],
+                                correct: 0,
+                                explanation: "f-strings are created by prefixing the string with 'f' or 'F'. Variables inside {} are evaluated."
+                            },
+                            {
+                                question: "What is the output of: print('Hello' * 2)?",
+                                options: ["HelloHello", "Hello Hello", "Hello2", "Error"],
+                                correct: 0,
+                                explanation: "The * operator with strings repeats the string. 'Hello' * 2 produces 'HelloHello'."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Lists",
+                        subtitle: "Work with ordered, mutable collections",
+                        icon: "📋",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Creating & Accessing Lists",
+                                content: `<p>Lists are <strong class="text-indigo-400">ordered, mutable</strong> collections that can hold items of different data types. They use square brackets <code class="text-cyan-400">[]</code>.</p>`,
+                                codes: [
+                                    {
+                                        title: "lists.py",
+                                        code: `# Creating lists
+numbers = [1, 2, 4, 4, 3, 3, 3, 6, 5]
+mixed = [1, 2, 'Geeks', 4, 'For', 6, 'Geeks']
+
+print("Numbers:", numbers)
+print("Mixed:", mixed)
+
+# Accessing elements
+fruits = ['apple', 'banana', 'cherry', 'date']
+print("First:", fruits[0])
+print("Last:", fruits[-1])
+print("Slice [1:3]:", fruits[1:3])
+
+# List operations
+lst1 = [1, 3, 5]
+lst2 = [6, 7, 8]
+print("Concat:", lst1 + lst2)
+print("Repeat:", lst1 * 3)
+
+# Nested list
+L = ['a', ['bb', ['ccc', 'ddd'], 'ee'], 'f']
+print("L[1]:", L[1])
+print("L[1][1]:", L[1][1])
+print("L[1][1][0]:", L[1][1][0])`,
+                                        output: `Numbers: [1, 2, 4, 4, 3, 3, 3, 6, 5]
+Mixed: [1, 2, 'Geeks', 4, 'For', 6, 'Geeks']
+First: apple
+Last: date
+Slice [1:3]: ['banana', 'cherry']
+Concat: [1, 3, 5, 6, 7, 8]
+Repeat: [1, 3, 5, 1, 3, 5, 1, 3, 5]
+L[1]: ['bb', ['ccc', 'ddd'], 'ee']
+L[1][1]: ['ccc', 'ddd']
+L[1][1][0]: ccc`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "List Methods",
+                                content: `<p>Python provides many built-in methods to manipulate lists:</p>`,
+                                table: {
+                                    headers: ["Method", "Description", "Example"],
+                                    rows: [
+                                        ["append(x)", "Add item to end", "[1,2].append(3) → [1,2,3]"],
+                                        ["extend(lst)", "Add multiple items", "[1].extend([2,3]) → [1,2,3]"],
+                                        ["insert(i,x)", "Insert at position", "[1,3].insert(1,2) → [1,2,3]"],
+                                        ["remove(x)", "Remove first occurrence", "[1,2,1].remove(1) → [2,1]"],
+                                        ["pop(i)", "Remove & return item", "[1,2,3].pop() → 3"],
+                                        ["clear()", "Remove all items", "[1,2].clear() → []"],
+                                        ["count(x)", "Count occurrences", "[1,1,2].count(1) → 2"],
+                                        ["sort()", "Sort the list", "[3,1,2].sort() → [1,2,3]"],
+                                        ["reverse()", "Reverse the list", "[1,2,3].reverse() → [3,2,1]"],
+                                        ["len(lst)", "Get length", "len([1,2,3]) → 3"]
+                                    ]
+                                },
+                                codes: [
+                                    {
+                                        title: "list_methods.py",
+                                        code: `fruits = ['apple', 'banana']
+
+fruits.append('cherry')
+print("After append:", fruits)
+
+fruits.insert(1, 'mango')
+print("After insert:", fruits)
+
+fruits.remove('banana')
+print("After remove:", fruits)
+
+popped = fruits.pop()
+print("Popped:", popped)
+print("After pop:", fruits)
+
+nums = [3, 1, 4, 1, 5, 9, 2, 6]
+nums.sort()
+print("Sorted:", nums)
+
+nums.reverse()
+print("Reversed:", nums)
+
+print("Count of 1:", [1,1,2,3,1].count(1))
+print("Max:", max(nums))
+print("Min:", min(nums))
+print("Sum:", sum(nums))`,
+                                        output: `After append: ['apple', 'banana', 'cherry']
+After insert: ['apple', 'mango', 'banana', 'cherry']
+After remove: ['apple', 'mango', 'cherry']
+Popped: cherry
+After pop: ['apple', 'mango']
+Sorted: [1, 1, 2, 3, 4, 5, 6, 9]
+Reversed: [9, 6, 5, 4, 3, 2, 1, 1]
+Count of 1: 3
+Max: 9
+Min: 1
+Sum: 31`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "Stack & Queue using Lists",
+                                content: `<p>Lists can be used to implement <strong class="text-indigo-400">Stacks (LIFO)</strong> and <strong class="text-purple-400">Queues (FIFO)</strong>.</p>`,
+                                codes: [
+                                    {
+                                        title: "stack_queue.py",
+                                        code: `# STACK (Last In, First Out)
+print("=== STACK ===")
+stack = ["Amar", "Akbar", "Anthony"]
+stack.append("Ram")
+stack.append("Iqbal")
+print("Stack:", stack)
+print("Popped:", stack.pop())
+print("Stack:", stack)
+print("Popped:", stack.pop())
+print("Stack:", stack)
+
+# QUEUE (First In, First Out)
+print("\\n=== QUEUE ===")
+queue = ["Amar", "Akbar", "Anthony"]
+queue.append("Ram")
+queue.append("Iqbal")
+print("Queue:", queue)
+print("Dequeued:", queue.pop(0))
+print("Queue:", queue)
+print("Dequeued:", queue.pop(0))
+print("Queue:", queue)`,
+                                        output: `=== STACK ===
+Stack: ['Amar', 'Akbar', 'Anthony', 'Ram', 'Iqbal']
+Popped: Iqbal
+Stack: ['Amar', 'Akbar', 'Anthony', 'Ram']
+Popped: Ram
+Stack: ['Amar', 'Akbar', 'Anthony']
+
+=== QUEUE ===
+Queue: ['Amar', 'Akbar', 'Anthony', 'Ram', 'Iqbal']
+Dequeued: Amar
+Queue: ['Akbar', 'Anthony', 'Ram', 'Iqbal']
+Dequeued: Akbar
+Queue: ['Anthony', 'Ram', 'Iqbal']`
+                                    }
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "Which method adds an element to the END of a list?",
+                                options: ["insert()", "append()", "add()", "push()"],
+                                correct: 1,
+                                explanation: "append() adds a single element to the end of the list. insert() adds at a specific position."
+                            },
+                            {
+                                question: "What is the output of: [1,2,3] + [4,5]?",
+                                options: ["[5, 7]", "[1, 2, 3, 4, 5]", "Error", "[[1,2,3], [4,5]]"],
+                                correct: 1,
+                                explanation: "The + operator concatenates two lists, creating a new list with all elements from both."
+                            },
+                            {
+                                question: "Which data structure uses LIFO (Last In First Out)?",
+                                options: ["Queue", "Stack", "List", "Dictionary"],
+                                correct: 1,
+                                explanation: "Stack follows LIFO principle - the last element added is the first one removed (using append() and pop())."
+                            },
+                            {
+                                question: "What does list.pop() return?",
+                                options: ["The entire list", "The last element", "The first element", "None"],
+                                correct: 1,
+                                explanation: "pop() without arguments removes and returns the last element. pop(0) removes the first element."
+                            },
+                            {
+                                question: "What is the output of: len([1, [2, 3], 4])?",
+                                options: ["4", "3", "5", "Error"],
+                                correct: 1,
+                                explanation: "The list has 3 elements: 1, [2,3], and 4. The nested list counts as one element."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Dictionaries",
+                        subtitle: "Store data in key-value pairs",
+                        icon: "📖",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Creating & Accessing Dictionaries",
+                                content: `<p>Dictionaries store data as <strong class="text-indigo-400">key-value pairs</strong>. Keys must be unique and immutable, values can be anything.</p>`,
+                                codes: [
+                                    {
+                                        title: "dictionaries.py",
+                                        code: `# Creating a dictionary
+employee = {
+    "Name": "Dev",
+    "Age": 20,
+    "salary": 45000,
+    "Company": "WIPRO"
+}
+
+print("Type:", type(employee))
+print("Full dict:", employee)
+
+# Accessing values
+print("Name:", employee["Name"])
+print("Salary:", employee["salary"])
+
+# Using get() method
+print("Age:", employee.get("Age"))
+print("Dept:", employee.get("Dept", "NA"))
+
+# Accessing with format
+print("Name: %s" % employee["Name"])
+print("Age: %d" % employee["Age"])`,
+                                        output: `Type: <class 'dict'>
+Full dict: {'Name': 'Dev', 'Age': 20, 'salary': 45000, 'Company': 'WIPRO'}
+Name: Dev
+Salary: 45000
+Age: 20
+Dept: NA
+Name: Dev
+Age: 20`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Keys must be unique and immutable (strings, numbers, tuples)",
+                                    "Values can be any data type, including duplicates",
+                                    "Dictionaries are unordered (until Python 3.7+)",
+                                    "Case-sensitive keys ('Name' ≠ 'name')",
+                                    "Access using dict[key] or dict.get(key)",
+                                    "get() returns None or default if key not found"
+                                ]
+                            },
+                            {
+                                title: "Dictionary Methods",
+                                content: `<p>Essential dictionary methods for manipulation:</p>`,
+                                table: {
+                                    headers: ["Method", "Description"],
+                                    rows: [
+                                        ["keys()", "Returns all keys"],
+                                        ["values()", "Returns all values"],
+                                        ["items()", "Returns (key, value) pairs"],
+                                        ["get(key, default)", "Get value with default"],
+                                        ["update(dict2)", "Merge another dictionary"],
+                                        ["pop(key)", "Remove & return value"],
+                                        ["clear()", "Remove all items"],
+                                        ["copy()", "Shallow copy"],
+                                        ["setdefault(key, default)", "Get or set default"]
+                                    ]
+                                },
+                                codes: [
+                                    {
+                                        title: "dict_methods.py",
+                                        code: `student = {"name": "Ravi", "age": 20, "grade": "A"}
+
+print("Keys:", list(student.keys()))
+print("Values:", list(student.values()))
+print("Items:", list(student.items()))
+
+# Update/Add values
+student["age"] = 21
+student["city"] = "Bangalore"
+print("Updated:", student)
+
+# Iterate through dictionary
+print("\\nIteration:")
+for key, value in student.items():
+    print(f"{key}: {value}")
+
+# Populate using zip
+keys = ["One", "Two", "Three"]
+values = [1, 2, 3]
+result = dict(zip(keys, values))
+print("\\nZip result:", result)
+
+# fromkeys() method
+seq = ('name', 'age', 'sex')
+new_dict = dict.fromkeys(seq, 10)
+print("fromkeys:", new_dict)`,
+                                        output: `Keys: ['name', 'age', 'grade']
+Values: ['Ravi', 20, 'A']
+Items: [('name', 'Ravi'), ('age', 20), ('grade', 'A')]
+Updated: {'name': 'Ravi', 'age': 21, 'grade': 'A', 'city': 'Bangalore'}
+
+Iteration:
+name: Ravi
+age: 21
+grade: A
+city: Bangalore
+
+Zip result: {'One': 1, 'Two': 2, 'Three': 3}
+fromkeys: {'name': 10, 'age': 10, 'sex': 10}`
+                                    }
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "What happens if you try to use a duplicate key in a dictionary?",
+                                options: ["Error is raised", "The old value is overwritten", "Both values are stored", "Key is ignored"],
+                                correct: 1,
+                                explanation: "Dictionary keys must be unique. If you assign a value to an existing key, it overwrites the previous value."
+                            },
+                            {
+                                question: "Which method returns all keys of a dictionary?",
+                                options: ["dict.all()", "dict.keys()", "dict.getKeys()", "dict.key()"],
+                                correct: 1,
+                                explanation: "keys() returns a view object containing all the keys of the dictionary."
+                            },
+                            {
+                                question: "What does dict.get('key', 'default') return if key doesn't exist?",
+                                options: ["None", "Error", "'default'", "Empty string"],
+                                correct: 2,
+                                explanation: "get() returns the default value (second argument) if the key is not found, instead of raising KeyError."
+                            },
+                            {
+                                question: "Which data type CANNOT be used as a dictionary key?",
+                                options: ["String", "Integer", "Tuple", "List"],
+                                correct: 3,
+                                explanation: "Dictionary keys must be immutable. Lists are mutable, so they cannot be used as keys."
+                            },
+                            {
+                                question: "What does dict.items() return?",
+                                options: ["Only keys", "Only values", "Key-value pairs as tuples", "Length of dict"],
+                                correct: 2,
+                                explanation: "items() returns a view of (key, value) tuple pairs, useful for iterating through the dictionary."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Functions",
+                        subtitle: "Create reusable blocks of code",
+                        icon: "⚡",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Defining & Calling Functions",
+                                content: `<p>Functions are reusable blocks of code that perform specific tasks. They help make code <strong class="text-indigo-400">modular, organized, and reusable</strong>.</p>`,
+                                codes: [
+                                    {
+                                        title: "functions.py",
+                                        code: `# Defining a function
+def square(num):
+    """This function computes the square."""
+    return num ** 2
+
+# Calling the function
+result = square(6)
+print("Square:", result)
+
+# Function with multiple parameters
+def hello(name1, name2, name3):
+    print("Hello", name1)
+    print("Hi", name2)
+    print("Hola", name3)
+
+hello("Siri", "Kanchana", "Madhuri")
+
+# Built-in functions
+print("abs(-7.25):", abs(-7.25))
+print("len('Hello'):", len("Hello"))
+print("max(10,20,30):", max(10, 20, 30))
+print("min(10,20,30):", min(10, 20, 30))
+
+# Function returning length
+def a_function(string):
+    return len(string)
+
+print("Length of 'Functions':", a_function("Functions"))
+print("Length of 'Python':", a_function("Python"))`,
+                                        output: `Square: 36
+Hello Siri
+Hi Kanchana
+Hola Madhuri
+abs(-7.25): 7.25
+len('Hello'): 5
+max(10,20,30): 30
+min(10,20,30): 10
+Length of 'Functions': 9
+Length of 'Python': 6`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Use 'def' keyword to define functions",
+                                    "Function names should be lowercase with underscores",
+                                    "Return statement sends value back to caller",
+                                    "Docstrings (\"\"\") describe function purpose",
+                                    "Functions must be defined before they are called"
+                                ]
+                            },
+                            {
+                                title: "Function Arguments",
+                                content: `<p>Python supports four types of function arguments:</p>`,
+                                codes: [
+                                    {
+                                        title: "arguments.py",
+                                        code: `# 1. Required Arguments
+def greet(name):
+    print("Hello", name)
+greet("BCA")
+
+# 2. Keyword Arguments
+def divide(a, b):
+    return a / b
+print("divide(b=3, a=12):", divide(b=3, a=12))
+
+# 3. Default Arguments
+def add_numbers(a=7, b=8):
+    return a + b
+print("add_numbers(2, 3):", add_numbers(2, 3))
+print("add_numbers(a=2):", add_numbers(a=2))
+print("add_numbers():", add_numbers())
+
+# 4. Variable-length Arguments (*args, **kwargs)
+def myFun(*argv):
+    for arg in argv:
+        print(arg, end=' ')
+    print()
+myFun('Hello', 'Welcome', 'to', 'NICT')
+
+def myFun2(**kwargs):
+    for key, value in kwargs.items():
+        print(f"{key} = {value}")
+myFun2(first='Geeks', mid='for', last='Geeks')`,
+                                        output: `Hello BCA
+divide(b=3, a=12): 4.0
+add_numbers(2, 3): 5
+add_numbers(a=2): 10
+add_numbers(): 15
+Hello Welcome to NICT
+first = Geeks
+mid = for
+last = Geeks`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "Recursion",
+                                content: `<p><strong class="text-indigo-400">Recursion</strong> is when a function calls itself. Every recursive function needs a <strong class="text-purple-400">base case</strong> to stop!</p>`,
+                                codes: [
+                                    {
+                                        title: "recursion.py",
+                                        code: `# Factorial using recursion
+def factorial(n):
+    if n <= 1:       # Base case
+        return 1
+    else:            # Recursive case
+        return n * factorial(n - 1)
+
+print("factorial(5):", factorial(5))
+
+# Sum of natural numbers
+def sum_n(n):
+    if n <= 1:
+        return n
+    return n + sum_n(n - 1)
+
+print("sum_n(6):", sum_n(6))
+
+# Fibonacci
+def fib(n):
+    if n <= 1:
+        return n
+    return fib(n-1) + fib(n-2)
+
+print("Fibonacci:", end=' ')
+for i in range(8):
+    print(fib(i), end=" ")
+print()
+
+# Direct vs Indirect Recursion
+# Direct: function calls itself
+# Indirect: A calls B, B calls A`,
+                                        output: `factorial(5): 120
+sum_n(6): 21
+Fibonacci: 0 1 1 2 3 5 8 13`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Base case: condition to stop recursion",
+                                    "Recursive case: function calls itself",
+                                    "Python limits recursion to 1000 calls by default",
+                                    "Direct recursion: function calls itself",
+                                    "Indirect recursion: A calls B, B calls A"
+                                ]
+                            },
+                            {
+                                title: "Scope of Variables",
+                                content: `<p>Variables have different scopes in Python: <strong class="text-indigo-400">Local, Global, and Nonlocal</strong>.</p>`,
+                                codes: [
+                                    {
+                                        title: "scope.py",
+                                        code: `# Global Variable
+message = 'Hello'
+def greet():
+    print('Local', message)
+greet()
+print('Global', message)
+
+# Local Variable
+def my_func():
+    local_var = 100
+    print("Inside:", local_var)
+my_func()
+# print(local_var)  # Error! Not accessible outside
+
+# Nonlocal Variable
+def func1():
+    a = 20
+    def func2():
+        nonlocal a
+        a = 30
+        print('func2:', a)
+    func2()
+    print('func1:', a)
+func1()
+
+# Call by value vs reference
+def myFunc(a):
+    a += 2
+    print("Inside:", a)
+num = 13
+myFunc(num)
+print("Outside:", num)  # Unchanged (immutable)`,
+                                        output: `Local Hello
+Global Hello
+Inside: 100
+func2: 30
+func1: 30
+Inside: 15
+Outside: 13`
+                                    }
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "What symbol is used for variable-length non-keyword arguments?",
+                                options: ["**args", "*args", "&args", "#args"],
+                                correct: 1,
+                                explanation: "*args is used for variable-length non-keyword arguments. **kwargs is for keyword arguments."
+                            },
+                            {
+                                question: "Which keyword is used to define a function?",
+                                options: ["function", "func", "def", "define"],
+                                correct: 2,
+                                explanation: "The 'def' keyword is used to define functions in Python."
+                            },
+                            {
+                                question: "What is the base case in recursion?",
+                                options: ["The first call", "The condition that stops recursion", "The recursive call", "The return value"],
+                                correct: 1,
+                                explanation: "Base case is the condition that stops the recursion. Without it, the function would run infinitely."
+                            },
+                            {
+                                question: "What does 'nonlocal' keyword do?",
+                                options: ["Makes variable global", "Refers to variable in enclosing function", "Creates new variable", "Deletes variable"],
+                                correct: 1,
+                                explanation: "nonlocal is used in nested functions to refer to variables in the enclosing (parent) function's scope."
+                            },
+                            {
+                                question: "What is the output of: def f(a=5): return a*2; print(f())?",
+                                options: ["5", "10", "Error", "None"],
+                                correct: 1,
+                                explanation: "Default argument a=5 is used when no argument is passed. f() returns 5*2 = 10."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Exception Handling",
+                        subtitle: "Handle errors gracefully in your programs",
+                        icon: "🛡️",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Understanding Errors & Exceptions",
+                                content: `<p><strong class="text-indigo-400">Errors</strong> are problems that halt program execution. There are two main types:</p>
+                                <p class="mt-2"><strong class="text-purple-400">1. Syntax Errors:</strong> Invalid Python syntax (caught before execution)</p>
+                                <p><strong class="text-purple-400">2. Logical Errors (Exceptions):</strong> Runtime errors that occur during execution</p>`,
+                                codes: [
+                                    {
+                                        title: "errors.py",
+                                        code: `# Syntax Error (missing colon)
+# if number > 50    ← SyntaxError!
+#     print("Greater")
+
+# Runtime Errors (Exceptions)
+# print(7 / 0)           ← ZeroDivisionError
+# print(10 + "5")        ← TypeError
+# my_list = [1,2,3]
+# print(my_list[5])      ← IndexError`,
+                                        output: ``
+                                    }
+                                ],
+                                table: {
+                                    headers: ["Exception", "Description"],
+                                    rows: [
+                                        ["ImportError", "Module not found"],
+                                        ["NameError", "Variable not defined"],
+                                        ["TypeError", "Wrong data type operation"],
+                                        ["ValueError", "Invalid value"],
+                                        ["ZeroDivisionError", "Division by zero"],
+                                        ["IndexError", "Invalid index"],
+                                        ["KeyError", "Invalid dictionary key"],
+                                        ["FileNotFoundError", "File doesn't exist"],
+                                        ["EOFError", "End of file reached"],
+                                        ["ArithmeticError", "Numeric calculation error"],
+                                        ["RuntimeError", "Generic runtime error"]
+                                    ]
+                                }
+                            },
+                            {
+                                title: "Try-Except-Else-Finally",
+                                content: `<p>Python uses <code class="text-cyan-400">try-except</code> blocks to handle exceptions gracefully without crashing.</p>`,
+                                codes: [
+                                    {
+                                        title: "exception_handling.py",
+                                        code: `# Basic try-except
+try:
+    a = 5
+    b = '0'
+    print(a / b)
+except:
+    print('Some error occurred.')
+print("Out of try-except blocks.")
+
+# Try-Except with specific exception
+try:
+    num = int(input("Enter number: "))
+    result = 10 / num
+    print("Result:", result)
+except ZeroDivisionError:
+    print("Cannot divide by zero!")
+except ValueError:
+    print("Please enter a valid number!")
+
+# Try-Except-Else-Finally
+try:
+    numerator = 10
+    denominator = 2
+    result = numerator / denominator
+    print("Division:", result)
+except ZeroDivisionError:
+    print("Error: Denominator cannot be 0.")
+else:
+    print("No exceptions occurred!")
+finally:
+    print("This always executes.")`,
+                                        output: `Some error occurred.
+Out of try-except blocks.
+Enter number: 2
+Result: 5.0
+Division: 5.0
+No exceptions occurred!
+This always executes.`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "try: block contains code that might raise exceptions",
+                                    "except: block handles the exception",
+                                    "else: runs if NO exception occurred",
+                                    "finally: ALWAYS runs (cleanup code)",
+                                    "You can catch specific exception types",
+                                    "Multiple except blocks can handle different errors"
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "Which block ALWAYS executes, whether an exception occurred or not?",
+                                options: ["try", "except", "else", "finally"],
+                                correct: 3,
+                                explanation: "The finally block always executes, regardless of whether an exception occurred. It's used for cleanup code."
+                            },
+                            {
+                                question: "When does the 'else' block execute in try-except?",
+                                options: ["Always", "When exception occurs", "When NO exception occurs", "Never"],
+                                correct: 2,
+                                explanation: "The else block executes only when the try block completes without raising any exception."
+                            },
+                            {
+                                question: "Which exception is raised when dividing by zero?",
+                                options: ["ValueError", "ArithmeticError", "ZeroDivisionError", "MathError"],
+                                correct: 2,
+                                explanation: "ZeroDivisionError is specifically raised when division or modulo by zero is attempted."
+                            },
+                            {
+                                question: "What type of error is a SyntaxError?",
+                                options: ["Runtime error", "Logical error", "Compile-time error", "Warning"],
+                                correct: 2,
+                                explanation: "SyntaxError is caught before execution (compile-time) when Python's syntax rules are violated."
+                            },
+                            {
+                                question: "Which exception is raised for invalid dictionary key?",
+                                options: ["IndexError", "ValueError", "KeyError", "NameError"],
+                                correct: 2,
+                                explanation: "KeyError is raised when trying to access a dictionary key that doesn't exist."
+                            }
+                        ]
+                    },
+                    {
+                        title: "File Handling",
+                        subtitle: "Read from and write to files",
+                        icon: "📁",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "File Modes & Types",
+                                content: `<p>Python can work with <strong class="text-indigo-400">Text files, Binary files, and CSV files</strong>. Use the <code class="text-cyan-400">open()</code> function to open files.</p>`,
+                                table: {
+                                    headers: ["Mode", "Description"],
+                                    rows: [
+                                        ["r", "Read (default). Error if file doesn't exist"],
+                                        ["w", "Write. Overwrites or creates new file"],
+                                        ["a", "Append. Adds to end of file"],
+                                        ["r+", "Read and write"],
+                                        ["x", "Create. Error if file exists"],
+                                        ["b", "Binary mode (rb, wb, ab)"],
+                                        ["t", "Text mode (default) (rt, wt)"],
+                                        ["+", "Update (read/write) mode"]
+                                    ]
+                                }
+                            },
+                            {
+                                title: "File Operations",
+                                content: `<p>Learn to create, read, write, and close files in Python:</p>`,
+                                codes: [
+                                    {
+                                        title: "file_handling.py",
+                                        code: `# Writing to a file
+file = open("test.txt", "w")
+file.write("Hello, NICT Students!\\n")
+file.write("Welcome to Python.\\n")
+file.close()
+
+# Reading from a file
+file = open("test.txt", "r")
+data = file.read()
+print("Full content:")
+print(data)
+file.close()
+
+# Best practice: use 'with' statement
+with open("test.txt", "r") as f:
+    content = f.read()
+    print("Using 'with':")
+    print(content)
+
+# Reading specific characters
+with open("test.txt", "r") as f:
+    data = f.read(10)
+    print("First 10 chars:", data)
+
+# Appending to a file
+with open("test.txt", "a") as f:
+    f.write("New line added!\\n")
+
+# Creating a new file
+f = open("newfile.txt", "x")
+f.close()
+print("File created!")`,
+                                        output: `Full content:
+Hello, NICT Students!
+Welcome to Python.
+
+Using 'with':
+Hello, NICT Students!
+Welcome to Python.
+
+First 10 chars: Hello, NIC
+File created!`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Always close files using close() or 'with' statement",
+                                    "'with' statement is safer - auto-closes even on errors",
+                                    "read() reads entire file, read(n) reads n characters",
+                                    "readline() reads one line at a time",
+                                    "readlines() returns list of all lines",
+                                    "Text files store human-readable characters",
+                                    "Binary files store raw bytes"
+                                ]
+                            },
+                            {
+                                title: "File Paths",
+                                content: `<p>Understanding absolute and relative paths:</p>`,
+                                codes: [
+                                    {
+                                        title: "file_paths.py",
+                                        code: `# Absolute path - full path from root
+# C:\\\\Users\\\\panka\\\\Documents\\\\test.txt
+
+# Relative path - from current directory
+# ./test.txt        (current folder)
+# ../test.txt       (parent folder)
+
+# Reading with full path
+# f = open("D:/data/test.txt", "r")
+
+# Format operator with files
+camels = 42
+formatted = '%d' % camels
+print("Formatted:", formatted)
+print("Type:", type(formatted))
+
+# Writing multiple lines
+with open("sample.txt", "w") as f:
+    lines = ["Line 1\\n", "Line 2\\n", "Line 3\\n"]
+    f.writelines(lines)
+print("Lines written!")`,
+                                        output: `Formatted: 42
+Type: <class 'str'>
+Lines written!`
+                                    }
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "Which file mode is used to ADD content to the end of a file?",
+                                options: ["r", "w", "a", "x"],
+                                correct: 2,
+                                explanation: "The 'a' (append) mode opens a file to add content at the end without overwriting existing data."
+                            },
+                            {
+                                question: "What does the 'with' statement do when working with files?",
+                                options: ["Opens the file", "Automatically closes the file", "Creates the file", "Deletes the file"],
+                                correct: 1,
+                                explanation: "The 'with' statement automatically closes the file when the block exits, even if an exception occurs."
+                            },
+                            {
+                                question: "Which mode creates a NEW file and raises error if it exists?",
+                                options: ["w", "r", "x", "a"],
+                                correct: 2,
+                                explanation: "The 'x' mode creates a new file. If the file already exists, it raises FileExistsError."
+                            },
+                            {
+                                question: "What does file.read(10) do?",
+                                options: ["Reads 10 lines", "Reads first 10 characters", "Reads 10 bytes", "Error"],
+                                correct: 1,
+                                explanation: "read(n) reads the first n characters from the file. read() without argument reads the entire file."
+                            },
+                            {
+                                question: "Which is an absolute path?",
+                                options: ["./test.txt", "../data.txt", "C:\\\\Users\\\\test.txt", "test.txt"],
+                                correct: 2,
+                                explanation: "An absolute path starts from the root directory (drive letter) and gives the complete location."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Object-Oriented Programming",
+                        subtitle: "Learn classes, objects, and OOP concepts",
+                        icon: "🏗️",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Classes & Objects",
+                                content: `<p><strong class="text-indigo-400">OOP</strong> is a programming paradigm based on the concept of "objects" containing data (attributes) and code (methods).</p>
+                                <p class="mt-2">Think of a <strong class="text-purple-400">Class</strong> as a blueprint, and an <strong class="text-purple-400">Object</strong> as the actual thing built from that blueprint.</p>`,
+                                codes: [
+                                    {
+                                        title: "oop_basics.py",
+                                        code: `# Defining a Class
+class Human:
+    # Constructor
+    def __init__(self, name, age, gender):
+        self.name = name
+        self.age = age
+        self.gender = gender
+    
+    # Methods (behaviors)
+    def introduce(self):
+        print(f"Hi, I'm {self.name}, {self.age} years old.")
+    
+    def walk(self):
+        print(f"{self.name} is walking.")
+
+# Creating Objects (Instances)
+ron = Human("Ron", 15, "Male")
+emma = Human("Emma", 22, "Female")
+
+# Accessing attributes and methods
+print("Name:", ron.name)
+print("Age:", emma.age)
+ron.introduce()
+emma.walk()
+
+# Class with pass (placeholder)
+class EmptyClass:
+    pass`,
+                                        output: `Name: Ron
+Age: 22
+Hi, I'm Ron, 15 years old.
+Emma is walking.`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "Class = Blueprint (logical entity)",
+                                    "Object = Instance of a class (physical entity)",
+                                    "__init__() is the constructor method",
+                                    "self refers to the current instance",
+                                    "Attributes = data (nouns)",
+                                    "Methods = behaviors (verbs)",
+                                    "'pass' is used as a placeholder"
+                                ]
+                            },
+                            {
+                                title: "OOP Pillars",
+                                content: `<p>The four pillars of Object-Oriented Programming:</p>`,
+                                table: {
+                                    headers: ["Pillar", "Description", "Benefit"],
+                                    rows: [
+                                        ["Encapsulation", "Bundling data & methods together", "Data security"],
+                                        ["Inheritance", "Child class inherits from parent", "Code reusability"],
+                                        ["Polymorphism", "Same method, different behavior", "Flexibility"],
+                                        ["Abstraction", "Hiding complex implementation", "Simplicity"]
+                                    ]
+                                },
+                                codes: [
+                                    {
+                                        title: "inheritance.py",
+                                        code: `# Inheritance Example
+class Animal:  # Parent class
+    def __init__(self, name):
+        self.name = name
+    
+    def speak(self):
+        print(f"{self.name} makes a sound")
+
+class Dog(Animal):  # Child class inherits Animal
+    def speak(self):  # Method overriding (Polymorphism)
+        print(f"{self.name} barks: Woof!")
+
+class Cat(Animal):
+    def speak(self):
+        print(f"{self.name} meows: Meow!")
+
+# Polymorphism in action
+animals = [Dog("Rex"), Cat("Whiskers"), Dog("Buddy")]
+for animal in animals:
+    animal.speak()
+
+# Encapsulation
+class BankAccount:
+    def __init__(self, owner, balance):
+        self.owner = owner
+        self.__balance = balance  # Private (__)
+    
+    def deposit(self, amount):
+        self.__balance += amount
+    
+    def get_balance(self):
+        return self.__balance
+
+acc = BankAccount("John", 1000)
+acc.deposit(500)
+print("Balance:", acc.get_balance())`,
+                                        output: `Rex barks: Woof!
+Whiskers meows: Meow!
+Buddy barks: Woof!
+Balance: 1500`
+                                    }
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "Which OOP concept allows a child class to inherit properties from a parent class?",
+                                options: ["Encapsulation", "Polymorphism", "Inheritance", "Abstraction"],
+                                correct: 2,
+                                explanation: "Inheritance allows a child class to inherit attributes and methods from a parent class, promoting code reusability."
+                            },
+                            {
+                                question: "What is the purpose of __init__() method?",
+                                options: ["Delete object", "Initialize object attributes", "Return value", "Print object"],
+                                correct: 1,
+                                explanation: "__init__() is the constructor method that initializes object attributes when an object is created."
+                            },
+                            {
+                                question: "What does 'self' refer to in a class method?",
+                                options: ["The class itself", "The current instance", "Parent class", "Global scope"],
+                                correct: 1,
+                                explanation: "'self' refers to the current instance of the class, allowing access to its attributes and methods."
+                            },
+                            {
+                                question: "Which concept bundles data and methods together?",
+                                options: ["Inheritance", "Polymorphism", "Encapsulation", "Abstraction"],
+                                correct: 2,
+                                explanation: "Encapsulation bundles data (attributes) and methods together in a class, providing data security."
+                            },
+                            {
+                                question: "What does the double underscore (__) prefix indicate?",
+                                options: ["Public attribute", "Private attribute", "Static attribute", "Class attribute"],
+                                correct: 1,
+                                explanation: "Double underscore prefix makes an attribute private (name mangling), restricting direct access from outside."
+                            }
+                        ]
+                    },
+                    {
+                        title: "GUI with Tkinter",
+                        subtitle: "Build desktop applications with Python",
+                        icon: "🖥️",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Introduction to Tkinter",
+                                content: `<p><strong class="text-indigo-400">Tkinter</strong> is Python's standard GUI (Graphical User Interface) library. It's built-in, cross-platform, and easy to use!</p>`,
+                                keyPoints: [
+                                    "Built into Python - no installation needed!",
+                                    "Cross-platform: Windows, macOS, Linux",
+                                    "Based on Tk toolkit (originally for Tcl)",
+                                    "Lightweight and fast",
+                                    "Many built-in widgets: buttons, labels, text boxes, etc.",
+                                    "Fastest way to create GUI applications in Python"
+                                ]
+                            },
+                            {
+                                title: "Hello World Tkinter App",
+                                content: `<p>Let's create our first GUI application!</p>`,
+                                codes: [
+                                    {
+                                        title: "hello_gui.py",
+                                        code: `import tkinter as tk
+
+# Create main window
+win = tk.Tk()
+win.title('Hello World!')
+win.geometry("300x200")
+
+# Add a label
+label = tk.Label(win, text="Welcome to NICT!",
+                 font=("Arial", 16))
+label.pack(pady=20)
+
+# Add a button
+def on_click():
+    label.config(text="Button Clicked!")
+
+btn = tk.Button(win, text="Click Me!",
+                command=on_click,
+                bg="blue", fg="white")
+btn.pack()
+
+# Start the application
+win.mainloop()`,
+                                        output: `(Opens a GUI window with label and button)`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "Common Tkinter Widgets",
+                                content: `<p>Essential widgets for building GUI applications:</p>`,
+                                table: {
+                                    headers: ["Widget", "Purpose"],
+                                    rows: [
+                                        ["Label", "Display text or images"],
+                                        ["Button", "Clickable button"],
+                                        ["Entry", "Single-line text input"],
+                                        ["Text", "Multi-line text input"],
+                                        ["Frame", "Container for other widgets"],
+                                        ["Checkbutton", "Checkbox"],
+                                        ["Radiobutton", "Radio selection"],
+                                        ["Listbox", "List of options"],
+                                        ["Canvas", "Drawing area"],
+                                        ["Menu", "Menu bar"]
+                                    ]
+                                },
+                                codes: [
+                                    {
+                                        title: "form_gui.py",
+                                        code: `from tkinter import *
+
+win = Tk()
+win.geometry("400x250")
+win.title("Registration Form")
+
+# Labels
+Label(win, text="Name").place(x=30, y=50)
+Label(win, text="Email").place(x=30, y=90)
+Label(win, text="Password").place(x=30, y=130)
+
+# Entry fields
+Entry(win).place(x=100, y=50)
+Entry(win).place(x=100, y=90)
+Entry(win, show="*").place(x=100, y=130)
+
+# Submit button
+Button(win, text="Submit",
+       bg="green", fg="white").place(x=100, y=170)
+
+win.mainloop()`,
+                                        output: `(Opens registration form window)`
+                                    }
+                                ]
+                            },
+                            {
+                                title: "Geometry Managers",
+                                content: `<p>Tkinter provides 3 ways to arrange widgets in a window:</p>`,
+                                codes: [
+                                    {
+                                        title: "geometry.py",
+                                        code: `# 1. pack() - Stacks widgets (top/bottom/left/right)
+label.pack(side=TOP)
+button.pack(side=BOTTOM)
+
+# 2. grid() - Row and column layout (most flexible)
+label1.grid(row=0, column=0)
+entry1.grid(row=0, column=1)
+label2.grid(row=1, column=0)
+entry2.grid(row=1, column=1)
+
+# 3. place() - Absolute positioning
+button.place(x=100, y=200)
+label.place(relx=0.5, rely=0.5, anchor=CENTER)`,
+                                        output: ``
+                                    }
+                                ],
+                                keyPoints: [
+                                    "pack(): Simple stacking (top/bottom/left/right)",
+                                    "grid(): Row/column layout (most flexible, recommended)",
+                                    "place(): Exact x,y positioning (least flexible)",
+                                    "Never mix pack() and grid() in same container!",
+                                    "mainloop() starts the event loop"
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "Which Tkinter method starts the application's main event loop?",
+                                options: ["start()", "run()", "mainloop()", "begin()"],
+                                correct: 2,
+                                explanation: "mainloop() is an infinite loop that runs the application, waiting for and processing events until the window is closed."
+                            },
+                            {
+                                question: "Which widget is used for single-line text input?",
+                                options: ["Text", "Label", "Entry", "Input"],
+                                correct: 2,
+                                explanation: "Entry widget is used for single-line text input. Text widget is for multi-line input."
+                            },
+                            {
+                                question: "Which geometry manager uses rows and columns?",
+                                options: ["pack()", "grid()", "place()", "layout()"],
+                                correct: 1,
+                                explanation: "grid() organizes widgets in a 2D table of rows and columns. It's the most flexible geometry manager."
+                            },
+                            {
+                                question: "What does Tk() create in Tkinter?",
+                                options: ["A button", "The main window", "A label", "A menu"],
+                                correct: 1,
+                                explanation: "Tk() creates the main window (root window) of the application."
+                            },
+                            {
+                                question: "Is Tkinter built into Python?",
+                                options: ["Yes, in standard library", "No, must install separately", "Only on Windows", "Only on Linux"],
+                                correct: 0,
+                                explanation: "Tkinter is part of Python's standard library and comes pre-installed with Python."
+                            }
+                        ]
+                    },
+                    {
+                        title: "SQLite Database",
+                        subtitle: "Store and manage data with SQL",
+                        icon: "🗄️",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Introduction to SQLite3",
+                                content: `<p><strong class="text-indigo-400">SQLite3</strong> is a lightweight relational database built into Python. Data is stored in files on your computer!</p>`,
+                                keyPoints: [
+                                    "Built into Python - no installation needed!",
+                                    "Lightweight (~340KB)",
+                                    "Database stored as a single file",
+                                    "Used in iPhone apps, Firefox, and many more",
+                                    "Supports standard SQL commands",
+                                    "Dynamic type system"
+                                ],
+                                table: {
+                                    headers: ["SQLite Type", "Description"],
+                                    rows: [
+                                        ["NULL", "The value is a NULL value"],
+                                        ["INTEGER", "Signed integer (1-8 bytes)"],
+                                        ["REAL", "Floating point (8-byte IEEE)"],
+                                        ["TEXT", "Text string (UTF-8, UTF-16)"],
+                                        ["BLOB", "Binary data, stored as-is"]
+                                    ]
+                                }
+                            },
+                            {
+                                title: "SQLite CRUD Operations",
+                                content: `<p>Let's perform CRUD operations (Create, Read, Update, Delete):</p>`,
+                                codes: [
+                                    {
+                                        title: "sqlite_operations.py",
+                                        code: `import sqlite3
+
+# Connect to database (creates file if not exists)
+conn = sqlite3.connect('company.db')
+cursor = conn.cursor()
+
+# CREATE TABLE
+cursor.execute('''CREATE TABLE IF NOT EXISTS COMPANY
+    (ID INT PRIMARY KEY NOT NULL,
+     NAME TEXT NOT NULL,
+     AGE INT NOT NULL,
+     SALARY REAL)''')
+conn.commit()
+
+# INSERT records
+cursor.execute("INSERT INTO COMPANY VALUES (1,'Paul',32,20000)")
+cursor.execute("INSERT INTO COMPANY VALUES (2,'Allen',25,15000)")
+cursor.execute("INSERT INTO COMPANY VALUES (3,'Teddy',23,20000)")
+conn.commit()
+
+# SELECT (Read) records
+cursor.execute("SELECT * FROM COMPANY")
+rows = cursor.fetchall()
+for row in rows:
+    print(row)
+
+# UPDATE record
+cursor.execute("UPDATE COMPANY SET SALARY=25000 WHERE ID=1")
+conn.commit()
+print("Rows updated:", conn.total_changes)
+
+# DELETE record
+cursor.execute("DELETE FROM COMPANY WHERE ID=2")
+conn.commit()
+print("Rows deleted:", conn.total_changes)
+
+# Close connection
+conn.close()`,
+                                        output: `(1, 'Paul', 32, 20000.0)
+(2, 'Allen', 25, 15000.0)
+(3, 'Teddy', 23, 20000.0)
+Rows updated: 4
+Rows deleted: 5`
+                                    }
+                                ],
+                                keyPoints: [
+                                    "sqlite3.connect() creates/opens database file",
+                                    "cursor.execute() runs SQL commands",
+                                    "conn.commit() saves changes (IMPORTANT!)",
+                                    "cursor.fetchall() retrieves all rows",
+                                    "Always conn.close() when done!",
+                                    "Without commit(), changes are lost"
+                                ]
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "Which method saves changes to the SQLite database?",
+                                options: ["conn.save()", "conn.commit()", "conn.push()", "conn.update()"],
+                                correct: 1,
+                                explanation: "commit() saves all the changes made since the last commit. Without it, changes are lost when connection closes."
+                            },
+                            {
+                                question: "Which method executes SQL commands?",
+                                options: ["conn.run()", "cursor.execute()", "db.query()", "conn.sql()"],
+                                correct: 1,
+                                explanation: "cursor.execute() is used to execute SQL statements. The cursor object handles query execution."
+                            },
+                            {
+                                question: "What does cursor.fetchall() return?",
+                                options: ["Single row", "All rows as list of tuples", "Column names", "Number of rows"],
+                                correct: 1,
+                                explanation: "fetchall() returns all rows of a query result as a list of tuples."
+                            },
+                            {
+                                question: "What is the size of SQLite library?",
+                                options: ["~340KB", "~3MB", "~30KB", "~1MB"],
+                                correct: 0,
+                                explanation: "SQLite is very lightweight, approximately 340KB, making it ideal for embedded applications."
+                            },
+                            {
+                                question: "Which SQL command creates a new table?",
+                                options: ["MAKE TABLE", "NEW TABLE", "CREATE TABLE", "ADD TABLE"],
+                                correct: 2,
+                                explanation: "CREATE TABLE is the SQL command to create a new table in the database."
+                            }
+                        ]
+                    },
+                    {
+                        title: "Data Visualization",
+                        subtitle: "Create beautiful charts and graphs with Matplotlib",
+                        icon: "📊",
+                        visited: false,
+                        completed: false,
+                        sections: [
+                            {
+                                title: "Introduction to Matplotlib",
+                                content: `<p><strong class="text-indigo-400">Matplotlib</strong> is Python's most popular library for creating static, animated, and interactive visualizations.</p>`,
+                                keyPoints: [
+                                    "Install with: pip install matplotlib",
+                                    "Import as: import matplotlib.pyplot as plt",
+                                    "Often used with pandas for data analysis",
+                                    "Can create: scatter plots, line charts, bar charts, histograms, and more",
+                                    "Comprehensive library for data visualization"
+                                ]
+                            },
+                            {
+                                title: "Types of Charts",
+                                content: `<p>Let's explore the most common chart types:</p>`,
+                                codes: [
+                                    {
+                                        title: "visualization.py",
+                                        code: `import matplotlib.pyplot as plt
+import pandas as pd
+
+# Reading data from CSV
+data = pd.read_csv("tips.csv")
+
+# 1. SCATTER PLOT
+plt.scatter(data['day'], data['tip'])
+plt.title("Scatter Plot")
+plt.xlabel('Day')
+plt.ylabel('Tip')
+plt.show()
+
+# 2. LINE CHART
+plt.plot(data['tip'])
+plt.plot(data['size'])
+plt.title("Line Chart")
+plt.xlabel('Index')
+plt.ylabel('Values')
+plt.show()
+
+# 3. BAR CHART
+plt.bar(data['day'], data['tip'])
+plt.title("Bar Chart")
+plt.xlabel('Day')
+plt.ylabel('Tip')
+plt.show()
+
+# 4. HISTOGRAM
+plt.hist(data['total_bill'])
+plt.title("Histogram")
+plt.show()`,
+                                        output: `(Displays 4 different charts)`
+                                    }
+                                ],
+                                table: {
+                                    headers: ["Chart Type", "Function", "Use Case"],
+                                    rows: [
+                                        ["Line Chart", "plt.plot()", "Trends over time"],
+                                        ["Scatter Plot", "plt.scatter()", "Relationship between variables"],
+                                        ["Bar Chart", "plt.bar()", "Comparing categories"],
+                                        ["Histogram", "plt.hist()", "Frequency distribution"],
+                                        ["Pie Chart", "plt.pie()", "Parts of a whole"]
+                                    ]
+                                }
+                            }
+                        ],
+                        quizzes: [
+                            {
+                                question: "Which function creates a scatter plot in Matplotlib?",
+                                options: ["plt.plot()", "plt.scatter()", "plt.bar()", "plt.graph()"],
+                                correct: 1,
+                                explanation: "plt.scatter() creates scatter plots showing relationships between two variables using dots."
+                            },
+                            {
+                                question: "Which library is commonly used with Matplotlib for data analysis?",
+                                options: ["NumPy", "Pandas", "SciPy", "All of the above"],
+                                correct: 3,
+                                explanation: "Matplotlib works well with NumPy, Pandas, and SciPy for comprehensive data analysis and visualization."
+                            },
+                            {
+                                question: "What does plt.hist() create?",
+                                options: ["Line chart", "Bar chart", "Histogram", "Scatter plot"],
+                                correct: 2,
+                                explanation: "plt.hist() creates a histogram showing the frequency distribution of data."
+                            },
+                            {
+                                question: "How do you import Matplotlib?",
+                                options: ["import matplotlib", "import matplotlib.pyplot as plt", "import plot", "import graphs"],
+                                correct: 1,
+                                explanation: "The standard import is 'import matplotlib.pyplot as plt', using 'plt' as an alias."
+                            },
+                            {
+                                question: "Which function is used for bar charts?",
+                                options: ["plt.bar()", "plt.histogram()", "plt.column()", "plt.box()"],
+                                correct: 0,
+                                explanation: "plt.bar() creates bar charts for comparing categorical data."
+                            }
+                        ]
+                    }
+                ],
+
+                init() {
+                    const saved = localStorage.getItem('nict_python_progress');
+                    if (saved) {
+                        const data = JSON.parse(saved);
+                        this.topics.forEach((topic, i) => {
+                            if (data.completed && data.completed.includes(i)) {
+                                this.topics[i].completed = true;
+                            }
+                            if (data.visited && data.visited.includes(i)) {
+                                this.topics[i].visited = true;
+                            }
+                        });
+                    }
+                    this.updateProgress();
+                },
+
+                updateProgress() {
+                    this.completedTopics = this.topics.filter(t => t.completed).length;
+                    this.progress = Math.round((this.completedTopics / this.totalTopics) * 100);
+                },
+
+                markVisited(index) {
+                    this.topics[index].visited = true;
+                    this.quizAnswered = false;
+                    this.selectedAnswer = -1;
+                    this.currentQuizIndex = 0;
+                    this.isBookmarked = false;
+                    this.saveProgress();
+                },
+
+                completeTopic() {
+                    this.topics[this.currentTopic].completed = true;
+                    this.updateProgress();
+                    this.saveProgress();
+                    this.showToastMsg('🎉', 'Topic marked as complete!');
+                },
+
+                saveProgress() {
+                    const data = {
+                        completed: this.topics.map((t, i) => t.completed ? i : -1).filter(i => i >= 0),
+                        visited: this.topics.map((t, i) => t.visited ? i : -1).filter(i => i >= 0)
+                    };
+                    localStorage.setItem('nict_python_progress', JSON.stringify(data));
+                },
+
+                toggleBookmark() {
+                    this.isBookmarked = !this.isBookmarked;
+                    this.showToastMsg(this.isBookmarked ? '⭐' : '☆', this.isBookmarked ? 'Bookmarked!' : 'Bookmark removed');
+                },
+
+                prevTopic() {
+                    if (this.currentTopic > 0) {
+                        this.currentTopic--;
+                        this.markVisited(this.currentTopic);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+
+                nextTopic() {
+                    if (this.currentTopic < this.totalTopics - 1) {
+                        this.currentTopic++;
+                        this.markVisited(this.currentTopic);
+                        window.scrollTo({ top: 0, behavior: 'smooth' });
+                    }
+                },
+
+                switchQuiz(index) {
+                    this.currentQuizIndex = index;
+                    this.quizAnswered = false;
+                    this.selectedAnswer = -1;
+                },
+
+                prevQuiz() {
+                    if (this.currentQuizIndex > 0) {
+                        this.currentQuizIndex--;
+                        this.quizAnswered = false;
+                        this.selectedAnswer = -1;
+                    }
+                },
+
+                nextQuiz() {
+                    const total = this.topics[this.currentTopic].quizzes.length;
+                    if (this.currentQuizIndex < total - 1) {
+                        this.currentQuizIndex++;
+                        this.quizAnswered = false;
+                        this.selectedAnswer = -1;
+                    }
+                },
+
+                checkAnswer(index) {
+                    if (this.quizAnswered) return;
+                    this.quizAnswered = true;
+                    this.selectedAnswer = index;
+                    this.quizCorrect = index === this.topics[this.currentTopic].quizzes[this.currentQuizIndex].correct;
+                },
+
+                getQuizClass(index) {
+                    if (!this.quizAnswered) return '';
+                    if (index === this.topics[this.currentTopic].quizzes[this.currentQuizIndex].correct) return 'correct';
+                    if (index === this.selectedAnswer && !this.quizCorrect) return 'wrong';
+                    return '';
+                },
+
+                // FIXED: Token-based syntax highlighter that doesn't produce nested/broken HTML
+                highlightPython(code) {
+                    // Step 1: Escape HTML entities first
+                    let text = code
+                        .replace(/&/g, '&amp;')
+                        .replace(/</g, '&lt;')
+                        .replace(/>/g, '&gt;');
+                    
+                    // Step 2: Tokenize - find all tokens and replace with placeholders
+                    const tokens = [];
+                    let tokenIndex = 0;
+                    
+                    // Replace triple-quoted strings first
+                    text = text.replace(/("""[\s\S]*?"""|'''[\s\S]*?''')/g, (match) => {
+                        const placeholder = `__TOKEN_${tokenIndex}__`;
+                        tokens.push({ placeholder, html: `<span class="py-string">${match}</span>`, index: tokenIndex });
+                        tokenIndex++;
+                        return placeholder;
+                    });
+                    
+                    // Replace single/double quoted strings
+                    text = text.replace(/('[^']*'|"[^"]*")/g, (match) => {
+                        const placeholder = `__TOKEN_${tokenIndex}__`;
+                        tokens.push({ placeholder, html: `<span class="py-string">${match}</span>`, index: tokenIndex });
+                        tokenIndex++;
+                        return placeholder;
+                    });
+                    
+                    // Replace comments (must be after strings)
+                    text = text.replace(/(#.*$)/gm, (match) => {
+                        const placeholder = `__TOKEN_${tokenIndex}__`;
+                        tokens.push({ placeholder, html: `<span class="py-comment">${match}</span>`, index: tokenIndex });
+                        tokenIndex++;
+                        return placeholder;
+                    });
+                    
+                    // Replace decorators
+                    text = text.replace(/(@\w+)/g, (match) => {
+                        const placeholder = `__TOKEN_${tokenIndex}__`;
+                        tokens.push({ placeholder, html: `<span class="py-decorator">${match}</span>`, index: tokenIndex });
+                        tokenIndex++;
+                        return placeholder;
+                    });
+                    
+                    // Step 3: Highlight keywords (now safe - no HTML in text to match)
+                    const keywords = ['def', 'class', 'if', 'elif', 'else', 'for', 'while', 'break', 'continue', 'return', 'import', 'from', 'as', 'try', 'except', 'finally', 'with', 'raise', 'pass', 'lambda', 'in', 'not', 'and', 'or', 'is', 'True', 'False', 'None', 'global', 'nonlocal', 'yield', 'assert', 'del'];
+                    keywords.forEach(kw => {
+                        const regex = new RegExp(`\\b(${kw})\\b`, 'g');
+                        text = text.replace(regex, `<span class="py-keyword">$1</span>`);
+                    });
+                    
+                    // Highlight built-in functions
+                    const builtins = ['print', 'input', 'len', 'type', 'range', 'int', 'float', 'str', 'list', 'dict', 'set', 'tuple', 'bool', 'abs', 'max', 'min', 'sum', 'sorted', 'reversed', 'enumerate', 'zip', 'map', 'filter', 'open', 'isinstance', 'super', 'exit', 'quit', 'round', 'pow', 'help', 'dir', 'id', 'hash', 'repr'];
+                    builtins.forEach(fn => {
+                        const regex = new RegExp(`\\b(${fn})\\s*(?=\\()`, 'g');
+                        text = text.replace(regex, `<span class="py-builtin">$1</span>`);
+                    });
+                    
+                    // Highlight numbers
+                    text = text.replace(/\b(\d+\.?\d*)\b/g, '<span class="py-number">$1</span>');
+                    
+                    // Step 4: Restore all tokens
+                    tokens.forEach(token => {
+                        text = text.replace(token.placeholder, token.html);
+                    });
+                    
+                    return text;
+                },
+
+                copyCode(code) {
+                    navigator.clipboard.writeText(code).then(() => {
+                        this.showToastMsg('📋', 'Code copied to clipboard!');
+                    });
+                },
+
+                showToastMsg(icon, message) {
+                    this.toastIcon = icon;
+                    this.toastMessage = message;
+                    this.showToast = true;
+                    setTimeout(() => { this.showToast = false; }, 2500);
+                }
+            }
+        }
+    </script>
+</body>
+</html>
